@@ -1,0 +1,1 @@
+1. why when i use read with 4096 byted to read, the system falls?

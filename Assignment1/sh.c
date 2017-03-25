@@ -4,6 +4,8 @@
 #include "user.h"
 #include "fcntl.h"
 
+#include "stat.h"
+
 
 // Parsed command representation
 #define EXEC  1
@@ -499,40 +501,45 @@ nulterminate(struct cmd *cmd)
  params: 
     cmd - command to execute.
     argv - argument to the command.
-
 */
-static void execute_with_path (char *cmd, char** argv) {
-      char buffer[4096];
-      char* temp = 0;
-
-      exec(cmd,argv); // exec in the current directry or exec with absoulute path
-      int fd = open("path", O_RDONLY); 
-      if (fd < 0) {
-            printf(2, "Error: can't open 'path' file!\n");
-            exit();
-      }
-
-      if (read(fd, buffer, 4096) < 0) {
-          printf(2, "Error: can't read 'path' file!\n");
+void execute_with_path (char *cmd, char** argv) {
+  if (cmd[0] != '/'){
+    int fd = open("/path", O_RDONLY);
+    if (fd < 0) {
+          printf(2, "Error: can't open 'path' file!\n");
           exit();
-      }
-      
-      while (*buffer != '\0') {
-          char cmd_with_path[4096]; // init command to execute
-          memset(cmd_with_path, 0, 4096);
+    }
 
-          temp = strchr(buffer, ':'); // temp points to ':' char
-          printf(1, "temp: %s\nbuffer: %s\n", temp,buffer);
-          memmove(cmd_with_path, buffer, (uint)(temp-buffer));
-          printf(1, "in while4\n") ;
+    // compute '/path' file size and read it.
+    struct stat st;
+    fstat(fd, &st);
+    int file_size = st.size;
+    char path_buf[file_size];
+    if (read(fd,path_buf,file_size) < 0) {
+        printf(2, "Error: can't read '/path' file!\n");
+        exit();
+    }
+    path_buf[file_size-1] = 0;
 
-          printf(1, "only path: %s\n", cmd_with_path);
-          strcat(cmd_with_path, cmd);
-          printf(1, "after strcat: %s\n", cmd_with_path);
+    char* path = path_buf;
 
-          exec(cmd_with_path, argv); // if no return - execute success 
-          strcpy(buffer, temp+1);
-      }
-      printf(2, "exec %s failed\n", cmd);
+    while (*path != 0){
+      char* temp = strchr(path, ':'); // temp points to ':' char
+      *temp = 0; // in order to cut the string
+      int path_size = strlen(path);
+      int cmd_size = strlen(cmd);
+      int path_with_cmd_size = path_size + cmd_size;
+      char path_with_cmd[path_with_cmd_size+1]; // command with path to execute
+      memmove(path_with_cmd, path, path_size); // copy path
+      memmove(path_with_cmd+path_size, cmd, cmd_size); // copy command after path
+      path_with_cmd[path_with_cmd_size] = 0;
+      exec(path_with_cmd, argv); // if no return - execute success
+      path = temp + 1; // next path
+    }
+  }
+  else
+    exec(cmd, argv);
+
+  printf(2, "exec %s failed\n", cmd);
 }
 
