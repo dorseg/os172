@@ -516,7 +516,7 @@ static void execute_with_path (char *cmd, char** argv) {
           printf(2, "Error: can't read 'path' file!\n");
           exit();
       }
-
+      
       while (*buffer != '\0') {
           char cmd_with_path[4096]; // init command to execute
           memset(cmd_with_path, 0, 4096);
