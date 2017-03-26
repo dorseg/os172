@@ -182,9 +182,9 @@ fork(void)
 
 // Exit the current process.  Does not return.
 // An exited process remains in the zombie state
-// until its parent calls wait() to find out it exited.
+// until its parent calls wait(0) to find out it exited.
 void
-exit(void)
+exit(int status) // Ass1: task 2.1
 {
   struct proc *p;
   int fd;
@@ -207,7 +207,7 @@ exit(void)
 
   acquire(&ptable.lock);
 
-  // Parent might be sleeping in wait().
+  // Parent might be sleeping in wait(0).
   wakeup1(proc->parent);
 
   // Pass abandoned children to init.
@@ -228,7 +228,7 @@ exit(void)
 // Wait for a child process to exit and return its pid.
 // Return -1 if this process has no children.
 int
-wait(void)
+wait(int *status)
 {
   struct proc *p;
   int havekids, pid;

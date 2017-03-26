@@ -3,8 +3,8 @@ struct rtcdate;
 
 // system calls
 int fork(void);
-int exit(void) __attribute__((noreturn));
-int wait(void);
+int exit(int status) __attribute__((noreturn)); // Ass1: task 2.1 
+int wait(int *status); // Ass1: task 2.2
 int pipe(int*);
 int write(int, void*, int);
 int read(int, void*, int);
@@ -17,7 +17,7 @@ int unlink(char*);
 int fstat(int fd, struct stat*);
 int link(char*, char*);
 int mkdir(char*);
-int chdir(char*);
+int chdir(char*); 
 int dup(int);
 int getpid(void);
 char* sbrk(int);

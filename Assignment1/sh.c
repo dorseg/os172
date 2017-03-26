@@ -70,7 +70,7 @@ runcmd(struct cmd *cmd)
   struct redircmd *rcmd;
 
   if(cmd == 0)
-    exit();
+    exit(0);
 
   switch(cmd->type){
   default:
@@ -79,7 +79,7 @@ runcmd(struct cmd *cmd)
   case EXEC:
     ecmd = (struct execcmd*)cmd;
     if(ecmd->argv[0] == 0)
-      exit();
+      exit(0);
     // Ass1: Task 1.1 (support path)
     execute_with_path(ecmd->argv[0], ecmd->argv);
     break;
@@ -89,7 +89,7 @@ runcmd(struct cmd *cmd)
     close(rcmd->fd);
     if(open(rcmd->file, rcmd->mode) < 0){
       printf(2, "open %s failed\n", rcmd->file);
-      exit();
+      exit(0);
     }
     runcmd(rcmd->cmd);
     break;
@@ -98,7 +98,7 @@ runcmd(struct cmd *cmd)
     lcmd = (struct listcmd*)cmd;
     if(fork1() == 0)
       runcmd(lcmd->left);
-    wait();
+    wait(0);
     runcmd(lcmd->right);
     break;
 
@@ -122,8 +122,8 @@ runcmd(struct cmd *cmd)
     }
     close(p[0]);
     close(p[1]);
-    wait();
-    wait();
+    wait(0);
+    wait(0);
     break;
 
   case BACK:
@@ -132,7 +132,7 @@ runcmd(struct cmd *cmd)
       runcmd(bcmd->cmd);
     break;
   }
-  exit();
+  exit(0);
 }
 
 int
@@ -171,16 +171,16 @@ main(void)
     }
     if(fork1() == 0)
       runcmd(parsecmd(buf));
-    wait();
+    wait(0);
   }
-  exit();
+  exit(0);
 }
 
 void
 panic(char *s)
 {
   printf(2, "%s\n", s);
-  exit();
+  exit(0);
 }
 
 int
@@ -507,7 +507,7 @@ void execute_with_path (char *cmd, char** argv) {
     int fd = open("/path", O_RDONLY);
     if (fd < 0) {
           printf(2, "Error: can't open 'path' file!\n");
-          exit();
+          exit(0);
     }
 
     // compute '/path' file size and read it.
@@ -517,7 +517,7 @@ void execute_with_path (char *cmd, char** argv) {
     char path_buf[file_size];
     if (read(fd,path_buf,file_size) < 0) {
         printf(2, "Error: can't read '/path' file!\n");
-        exit();
+        exit(0);
     }
     path_buf[file_size-1] = 0;
 
