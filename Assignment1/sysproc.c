@@ -14,15 +14,21 @@ sys_fork(void)
 }
 
 int
-sys_exit(int status) // Ass1: task 2.1
+sys_exit(void) // Ass1: task 2.1
 {
+  int status;
+  if(argint(0, &status) < 0)
+    return -1;
   exit(status);
   return 0;  // not reached
 }
 
 int
-sys_wait(int *status)
+sys_wait(void) // Ass1: task 2.2
 {
+  int* status = 0;
+  if(argint(0, status) < 0)
+    return -1;
   return wait(status);
 }
 

@@ -10,6 +10,11 @@
 void 
 pseudo_main(int (*entry)(int, char**), int argc, char **argv) 
 {
+  entry(argc, argv);
+
+ __asm__ ("movl $0, %ebx \n\t"
+          "movl $2, %eax \n\t"
+          "int $0x80");
 }
 
 int
@@ -87,11 +92,15 @@ exec(char *path, char **argv)
       goto bad;
     ustack[3+argc] = sp;
   }
+
+  argc++; // Ass 1 task 2.3
+
   ustack[3+argc] = 0;
 
   ustack[0] = 0xffffffff;  // fake return PC
-  ustack[1] = argc;
-  ustack[2] = sp - (argc+1)*4;  // argv pointer
+  ustack[1] = elf.entry; // save the entry to main in order to use it in pseudo main (Ass 1 task 2.3)
+  ustack[2] = argc; 
+  ustack[3] = sp - (argc+1)*4;  // argv pointer
 
   sp -= (3+argc+1) * 4;
   if(copyout(pgdir, sp, ustack, (3+argc+1)*4) < 0)
@@ -107,7 +116,7 @@ exec(char *path, char **argv)
   oldpgdir = proc->pgdir;
   proc->pgdir = pgdir;
   proc->sz = sz;
-  proc->tf->eip = elf.entry;  // main
+  proc->tf->eip = pointer_pseudo_main;  // psuedo main // Ass 1 task 2.3
   proc->tf->esp = sp;
   switchuvm(proc);
   freevm(oldpgdir);
