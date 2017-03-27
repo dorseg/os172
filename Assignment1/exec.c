@@ -12,7 +12,8 @@ pseudo_main(int (*entry)(int, char**), int argc, char **argv)
 {
   entry(argc, argv);
 
- __asm__ ("movl $0, %ebx \n\t"
+ __asm__ ("push %eax \n\t"
+          "push $0 \n\t"
           "movl $2, %eax \n\t"
           "int $0x80");
 }
@@ -90,20 +91,18 @@ exec(char *path, char **argv)
     sp = (sp - (strlen(argv[argc]) + 1)) & ~3;
     if(copyout(pgdir, sp, argv[argc], strlen(argv[argc]) + 1) < 0)
       goto bad;
-    ustack[3+argc] = sp;
+    ustack[4+argc] = sp; // Ass 1 task 2.3
   }
 
-  argc++; // Ass 1 task 2.3
-
-  ustack[3+argc] = 0;
+  ustack[4+argc] = 0; // Ass 1 task 2.3
 
   ustack[0] = 0xffffffff;  // fake return PC
   ustack[1] = elf.entry; // save the entry to main in order to use it in pseudo main (Ass 1 task 2.3)
   ustack[2] = argc; 
   ustack[3] = sp - (argc+1)*4;  // argv pointer
 
-  sp -= (3+argc+1) * 4;
-  if(copyout(pgdir, sp, ustack, (3+argc+1)*4) < 0)
+  sp -= (4+argc+1) * 4; // Ass 1 task 2.3
+  if(copyout(pgdir, sp, ustack, (4+argc+1)*4) < 0) // Ass 1 task 2.3
     goto bad;
 
   // Save program name for debugging.
