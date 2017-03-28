@@ -15,7 +15,7 @@ pseudo_main(int (*entry)(int, char**), int argc, char **argv)
  __asm__ ("push %eax \n\t"
           "push $0 \n\t"
           "movl $2, %eax \n\t"
-          "int $0x80");
+          "int $64");
 }
 
 int
@@ -91,7 +91,7 @@ exec(char *path, char **argv)
     sp = (sp - (strlen(argv[argc]) + 1)) & ~3;
     if(copyout(pgdir, sp, argv[argc], strlen(argv[argc]) + 1) < 0)
       goto bad;
-    ustack[4+argc] = sp; // Ass 1 task 2.3
+    ustack[4+argc] = sp; //increment stack size in order to save main entry // Ass 1 task 2.3
   }
 
   ustack[4+argc] = 0; // Ass 1 task 2.3

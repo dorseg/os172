@@ -6,5 +6,9 @@ int
 main(int argc, char *argv[])
 {
 	printf(1, "hello world\n");
-	return 0;
+	int x = 3 ;
+
+	if (x>3) return 0 ;
+	else return 1 ;
+	
 }
