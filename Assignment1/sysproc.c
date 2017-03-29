@@ -26,8 +26,8 @@ sys_exit(void) // Ass1: task 2.1
 int
 sys_wait(void) // Ass1: task 2.2
 {
-  int* status = 0;
-  if(argint(0, status) < 0)
+  int* status;
+  if(argint(0, (int*)&status) < 0)
     return -1;
   return wait(status);
 }

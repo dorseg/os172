@@ -221,6 +221,7 @@ exit(int status) // Ass1: task 2.1
 
   // Jump into the scheduler, never to return.
   proc->state = ZOMBIE;
+  proc->exit_status = status; // Ass1 task 2.3
   sched();
   panic("zombie exit");
 }
@@ -252,6 +253,8 @@ wait(int *status)
         p->name[0] = 0;
         p->killed = 0;
         p->state = UNUSED;
+        if (status != 0)
+          *status = p->exit_status;
         release(&ptable.lock);
         return pid;
       }
