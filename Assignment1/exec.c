@@ -10,7 +10,7 @@
 void 
 pseudo_main(int (*entry)(int, char**), int argc, char **argv) 
 {
-  entry(argc, argv);
+  entry(argc, argv); // exit status saved in eax 
 
  __asm__ ("push %eax \n\t"
           "push $0 \n\t"
