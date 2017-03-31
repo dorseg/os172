@@ -116,6 +116,7 @@ void            userinit(void);
 int             wait(int *status); // Ass1: task 2.2
 void            wakeup(void*);
 void            yield(void);
+void			priority(int);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

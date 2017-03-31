@@ -20,11 +20,14 @@ extern void trapret(void);
 
 static void wakeup1(void *chan);
 
+int PRNG(int);
+
 void
 pinit(void)
 {
   initlock(&ptable.lock, "ptable");
 }
+
 
 //PAGEBREAK: 32
 // Look in the process table for an UNUSED proc.
@@ -48,6 +51,7 @@ allocproc(void)
 
 found:
   p->state = EMBRYO;
+  p->priority = 10;
   p->pid = nextpid++;
 
   release(&ptable.lock);
@@ -253,7 +257,7 @@ wait(int *status)
         p->name[0] = 0;
         p->killed = 0;
         p->state = UNUSED;
-        if (status != 0)
+        if (status != 0) // Ass1 task 2.3
           *status = p->exit_status;
         release(&ptable.lock);
         return pid;
@@ -271,6 +275,39 @@ wait(int *status)
   }
 }
 
+/* Ass1 task3
+This policy distributes the tickets in such a way, so as to achieve a uniform time allocation to
+the processes.
+Note: the policy distributes the tickets only to RUNNABLE processes, in order to let the scheduler to pick a ticket only from
+RUNNABLE processes.
+*/
+int
+uniform_time_dist(void){
+  int total_tickets = 0;
+  int nticket_per_proc = 10;
+  struct proc *p;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if (p->state != RUNNABLE)
+      continue;
+    p->ntickets = nticket_per_proc;
+    total_tickets += nticket_per_proc;
+  }
+  return total_tickets;
+}
+
+int
+priority_scheduling(void){
+  int total_tickets = 0;
+  struct proc *p;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if (p->state != RUNNABLE)
+      continue;
+    p->ntickets = p->priority;
+    total_tickets += p->ntickets;
+  }
+  return total_tickets;
+}
+
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
@@ -283,6 +320,7 @@ void
 scheduler(void)
 {
   struct proc *p;
+  int ntickets = 0; // init number of total tickets
 
   for(;;){
     // Enable interrupts on this processor.
@@ -290,25 +328,32 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+
+    ntickets = priority_scheduling(); // number of tickets
+
+    int ticket = PRNG(ntickets);
+
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
-
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
-      swtch(&cpu->scheduler, p->context);
-      switchkvm();
-
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      proc = 0;
+      // p is RUNNABLE
+      ticket -= p->ntickets;
+      if (ticket < 0){
+        // Switch to chosen process.  It is the process's job
+        // to release ptable.lock and then reacquire it
+        // before jumping back to us.
+        proc = p;
+        switchuvm(p);
+        p->state = RUNNING;
+        swtch(&cpu->scheduler, p->context);
+        switchkvm();
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        proc = 0;
+        break; // start over
+      }
     }
     release(&ptable.lock);
-
   }
 }
 
@@ -486,3 +531,64 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+// change currently running process priority. Ass 1 task3.2.
+void
+priority(int pr){
+  proc->priority = pr;
+}
+
+// Ass1 task3
+
+// psuedo random number generator
+int
+PRNG(int bound)
+{
+  if (bound == 0)
+    return 0;
+
+  static unsigned int seed = 5323; // keep its value between invocations.
+
+  unsigned int next = seed;
+  int result;
+
+  next *= 1103515245;
+  next += 12345;
+  result = (unsigned int) (next / 65536) % 2048;
+
+  next *= 1103515245;
+  next += 12345;
+  result <<= 10;
+  result ^= (unsigned int) (next / 65536) % 1024;
+
+  next *= 1103515245;
+  next += 12345;
+  result <<= 10;
+  result ^= (unsigned int) (next / 65536) % 1024;
+
+  seed = next;
+
+  return result % bound;
+}
+
+
+// REMOVE-DE
+  /*
+for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+  if(p->state != RUNNABLE)
+    continue;
+
+  // Switch to chosen process.  It is the process's job
+  // to release ptable.lock and then reacquire it
+  // before jumping back to us.
+  proc = p;
+  switchuvm(p);
+  p->state = RUNNING;
+  swtch(&cpu->scheduler, p->context);
+  switchkvm();
+
+  // Process is done running for now.
+  // It should have changed its p->state before coming back.
+  proc = 0;
+}
+*/
