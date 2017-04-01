@@ -12,6 +12,11 @@ struct {
   struct proc proc[NPROC];
 } ptable;
 
+typedef struct {
+ char* name;
+ int (*fun) (void) ;
+} fun_desc ;
+
 static struct proc *initproc;
 
 int nextpid = 1;
@@ -19,6 +24,7 @@ extern void forkret(void);
 extern void trapret(void);
 
 static void wakeup1(void *chan);
+static int npolicy = 0; // the desired policy
 
 int PRNG(int);
 
@@ -51,7 +57,9 @@ allocproc(void)
 
 found:
   p->state = EMBRYO;
-  p->priority = 10;
+  //p->priority = 10;
+  //if (npolicy == 2)
+  //  p->ntickets = 20;
   p->pid = nextpid++;
 
   release(&ptable.lock);
@@ -287,6 +295,7 @@ uniform_time_dist(void){
   int nticket_per_proc = 10;
   struct proc *p;
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    p->ntickets = 10;
     if (p->state != RUNNABLE)
       continue;
     p->ntickets = nticket_per_proc;
@@ -300,6 +309,7 @@ priority_scheduling(void){
   int total_tickets = 0;
   struct proc *p;
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    p->priority = 10;
     if (p->state != RUNNABLE)
       continue;
     p->ntickets = p->priority;
@@ -307,6 +317,34 @@ priority_scheduling(void){
   }
   return total_tickets;
 }
+
+int
+dynamic_tickets_allc(void){
+  int total_tickets = 0;
+  struct proc *p;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    p->ntickets = 20;
+    if (p->state != RUNNABLE)
+      continue;
+    total_tickets += p->ntickets;
+  }
+  return total_tickets;
+}
+
+int
+getTickets(void){
+  int total_tickets = 0;
+  struct proc *p;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if (p->state != RUNNABLE)
+      continue;
+    total_tickets += p->ntickets;
+  }
+  return total_tickets;
+}
+
+fun_desc policies[] = {{"Policy 0", uniform_time_dist}, {"Policy 1", priority_scheduling}, {"Policy 2", dynamic_tickets_allc}, 
+                      {"NULL", 0}};
 
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
@@ -329,8 +367,12 @@ scheduler(void)
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
 
-    ntickets = priority_scheduling(); // number of tickets
-
+    if (ntickets == 0)
+      ntickets = policies[0].fun(); // default policy- uniform dist
+    
+    else
+      ntickets = getTickets(); // compute number of tickets each iteration
+    
     int ticket = PRNG(ntickets);
 
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
@@ -388,6 +430,8 @@ yield(void)
 {
   acquire(&ptable.lock);  //DOC: yieldlock
   proc->state = RUNNABLE;
+  if (npolicy == 2 && proc->ntickets>1)
+    proc->ntickets--;
   sched();
   release(&ptable.lock);
 }
@@ -438,6 +482,9 @@ sleep(void *chan, struct spinlock *lk)
   // Go to sleep.
   proc->chan = chan;
   proc->state = SLEEPING;
+  if (npolicy == 2 && proc->ntickets < 100){ // Ass 1 task 3.3
+    proc->ntickets += 10;
+  }
   sched();
 
   // Tidy up.
@@ -536,6 +583,13 @@ procdump(void)
 void
 priority(int pr){
   proc->priority = pr;
+}
+
+// change currently policy. Ass 1 task3.3.
+void
+policy(int pl){
+  npolicy = pl;
+  policies[pl].fun();
 }
 
 // Ass1 task3

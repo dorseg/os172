@@ -104,3 +104,12 @@ int sys_priority(void)
   priority(pr);
   return 0;
 }
+
+int sys_policy(void)
+{
+  int pl;
+  if(argint(0, &pl) < 0)
+    return -1;
+  policy(pl);
+  return 0;
+}
