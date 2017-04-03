@@ -113,3 +113,15 @@ int sys_policy(void)
   policy(pl);
   return 0;
 }
+
+int sys_wait_stat(void)
+{
+  int *status;
+  struct perf* performance;
+  if(argint(0, (int*)&status) < 0)
+    return -1;
+  if(argint(1, (int*)&performance) < 0)
+    return -1;
+  return wait_stat(status, performance);
+}
+

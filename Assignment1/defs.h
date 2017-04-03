@@ -9,6 +9,7 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
+struct perf; 				// performance struct 
 
 // bio.c
 void            binit(void);
@@ -113,11 +114,14 @@ void            scheduler(void) __attribute__((noreturn));
 void            sched(void);
 void            sleep(void*, struct spinlock*);
 void            userinit(void);
-int             wait(int*); // Ass1: task 2.2
+int             wait(int*); 
 void            wakeup(void*);
 void            yield(void);
 void			priority(int);
 void			policy(int);
+int				wait_stat(int*, struct perf*);
+void 			update_times(void);
+
 
 // swtch.S
 void            swtch(struct context**, struct context*);
@@ -162,6 +166,7 @@ void            idtinit(void);
 extern uint     ticks;
 void            tvinit(void);
 extern struct spinlock tickslock;
+int 			get_ticks(void);
 
 // uart.c
 void            uartinit(void);

@@ -85,6 +85,11 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 
+  p->ctime = get_ticks(); // current ticks
+  p->stime = 0; 
+  p->retime = 0;
+  p->rutime = 0;
+
   return p;
 }
 
@@ -234,6 +239,7 @@ exit(int status) // Ass1: task 2.1
   // Jump into the scheduler, never to return.
   proc->state = ZOMBIE;
   proc->exit_status = status; // Ass1 task 2.3
+  proc->ttime = get_ticks();
   sched();
   panic("zombie exit");
 }
@@ -592,9 +598,58 @@ policy(int pl){
   policies[pl].fun();
 }
 
-// Ass1 task3
+int wait_stat(int* status, struct perf *performance) {
 
-// psuedo random number generator
+  struct proc *p;
+  int havekids, pid;
+
+  acquire(&ptable.lock);
+  for(;;){
+    // Scan through table looking for exited children.
+    havekids = 0;
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->parent != proc)
+        continue;
+      havekids = 1;
+      if(p->state == ZOMBIE){
+        // Found one.
+        performance->ctime = p->ctime;
+        performance->ttime = p->ttime;
+        performance->stime = p->stime;
+        performance->retime = p->retime;
+        performance->rutime = p->rutime;
+
+        pid = p->pid;
+        kfree(p->kstack);
+        p->kstack = 0;
+        freevm(p->pgdir);
+        p->pid = 0;
+        p->parent = 0;
+        p->name[0] = 0;
+        p->killed = 0;
+        p->state = UNUSED;
+
+        if (status != 0) // Ass1 task 2.3
+          *status = p->exit_status;
+        release(&ptable.lock);
+        return pid;
+      }
+    }
+
+    // No point waiting if we don't have any children.
+    if(!havekids || proc->killed){
+      release(&ptable.lock);
+      return -1;
+    }
+
+    // Wait for children to exit.  (See wakeup1 call in proc_exit.)
+    sleep(proc, &ptable.lock);  //DOC: wait-sleep
+  }
+
+  return proc->pid ;
+} 
+
+// psuedo random number generator // Ass1 task3
 int
 PRNG(int bound)
 {
@@ -625,24 +680,26 @@ PRNG(int bound)
   return result % bound;
 }
 
+// This method updates the performance of the process, after each tick
+void update_times(void) {
+  struct proc* p;
+  acquire(&ptable.lock);
 
-// REMOVE-DE
-  /*
-for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-  if(p->state != RUNNABLE)
-    continue;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+    switch(p->state) {
+     case RUNNING:
+        p->rutime++;
+        break; 
+     case RUNNABLE:
+        p->retime++;
+        break; 
+     case SLEEPING:
+        p->stime++;
+        break;
+     default:
+        continue;
+    } 
+  } // for
 
-  // Switch to chosen process.  It is the process's job
-  // to release ptable.lock and then reacquire it
-  // before jumping back to us.
-  proc = p;
-  switchuvm(p);
-  p->state = RUNNING;
-  swtch(&cpu->scheduler, p->context);
-  switchkvm();
-
-  // Process is done running for now.
-  // It should have changed its p->state before coming back.
-  proc = 0;
+  release(&ptable.lock);
 }
-*/

@@ -31,3 +31,5 @@ SYSCALL(sleep)
 SYSCALL(uptime)
 SYSCALL(priority)
 SYSCALL(policy)
+SYSCALL(wait_stat)
+

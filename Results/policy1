@@ -1,0 +1,217 @@
+Sanity Test ! Calculating results.. please wait..
+
+the pid is 6
+the turnaround time is 199
+the ttime is 766
+the stime is 0
+the retime is 166
+the rutime is 33
+
+the pid is 12
+the turnaround time is 220
+the ttime is 790
+the stime is 0
+the retime is 187
+the rutime is 33
+
+the pid is 7
+the turnaround time is 266
+the ttime is 833
+the stime is 0
+the retime is 235
+the rutime is 31
+
+the pid is 10
+the turnaround time is 260
+the ttime is 828
+the stime is 0
+the retime is 230
+the rutime is 30
+
+the pid is 8
+the turnaround time is 284
+the ttime is 851
+the stime is 0
+the retime is 255
+the rutime is 28
+
+the pid is 5
+the turnaround time is 295
+the ttime is 862
+the stime is 0
+the retime is 267
+the rutime is 28
+
+the pid is 9
+the turnaround time is 295
+the ttime is 863
+the stime is 0
+the retime is 266
+the rutime is 29
+
+the pid is 14
+the turnaround time is 300
+the ttime is 870
+the stime is 0
+the retime is 264
+the rutime is 36
+
+the pid is 24
+the turnaround time is 262
+the ttime is 869
+the stime is 30
+the retime is 232
+the rutime is 0
+
+the pid is 15
+the turnaround time is 325
+the ttime is 895
+the stime is 30
+the retime is 263
+the rutime is 1
+
+the pid is 22
+the turnaround time is 289
+the ttime is 893
+the stime is 30
+the retime is 258
+the rutime is 1
+
+the pid is 13
+the turnaround time is 334
+the ttime is 904
+the stime is 0
+the retime is 302
+the rutime is 32
+
+the pid is 21
+the turnaround time is 301
+the ttime is 905
+the stime is 30
+the retime is 271
+the rutime is 0
+
+the pid is 20
+the turnaround time is 304
+the ttime is 908
+the stime is 30
+the retime is 273
+the rutime is 1
+
+the pid is 23
+the turnaround time is 303
+the ttime is 907
+the stime is 30
+the retime is 268
+the rutime is 2
+
+the pid is 28
+the turnaround time is 293
+the ttime is 909
+the stime is 5
+the retime is 256
+the rutime is 32
+
+the pid is 33
+the turnaround time is 286
+the ttime is 907
+the stime is 5
+the retime is 249
+the rutime is 32
+
+the pid is 34
+the turnaround time is 288
+the ttime is 909
+the stime is 5
+the retime is 241
+the rutime is 36
+
+the pid is 19
+the turnaround time is 310
+the ttime is 911
+the stime is 30
+the retime is 277
+the rutime is 0
+
+the pid is 11
+the turnaround time is 344
+the ttime is 912
+the stime is 0
+the retime is 310
+the rutime is 32
+
+the pid is 18
+the turnaround time is 310
+the ttime is 911
+the stime is 30
+the retime is 279
+the rutime is 1
+
+the pid is 31
+the turnaround time is 295
+the ttime is 911
+the stime is 5
+the retime is 253
+the rutime is 32
+
+the pid is 26
+the turnaround time is 306
+the ttime is 913
+the stime is 5
+the retime is 272
+the rutime is 29
+
+the pid is 32
+the turnaround time is 292
+the ttime is 913
+the stime is 5
+the retime is 257
+the rutime is 30
+
+the pid is 29
+the turnaround time is 298
+the ttime is 914
+the stime is 5
+the retime is 261
+the rutime is 32
+
+the pid is 16
+the turnaround time is 315
+the ttime is 916
+the stime is 30
+the retime is 284
+the rutime is 1
+
+the pid is 17
+the turnaround time is 315
+the ttime is 916
+the stime is 30
+the retime is 282
+the rutime is 3
+
+the pid is 25
+the turnaround time is 309
+the ttime is 916
+the stime is 5
+the retime is 274
+the rutime is 30
+
+the pid is 27
+the turnaround time is 317
+the ttime is 924
+the stime is 5
+the retime is 275
+the rutime is 28
+
+the pid is 30
+the turnaround time is 313
+the ttime is 929
+the stime is 5
+the retime is 276
+the rutime is 32
+
+The avrages are: 
+waiting time: 259
+turnaround time: 294
+running time: 21
+sleeping time: 11

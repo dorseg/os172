@@ -67,7 +67,23 @@ struct proc {
   int exit_status;             // Exit status of the terminated process. Ass1: task 2.1
   int ntickets;                // The amount of tickets allocated to the process. Ass1: task3
   int priority;                // Process priority
+
+  // Ass1 Task3.5
+  int ctime;                   // Process creation time
+  int ttime;                   // Process termination time
+  int stime;                   // The time the process spent in the SLEEPING state
+  int retime;                  // The time the process spent in the READY state
+  int rutime;                  // The time the process spent in the RUNNING state
 };
+
+struct perf {
+  int ctime;                   // Process creation time
+  int ttime;                   // Process termination time
+  int stime;                   // The time the process spent in the SLEEPING state
+  int retime;                  // The time the process spent in the READY state
+  int rutime;                  // The time the process spent in the RUNNING state
+};
+
 
 // Process memory is laid out contiguously, low addresses first:
 //   text

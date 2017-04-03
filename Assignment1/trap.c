@@ -51,6 +51,7 @@ trap(struct trapframe *tf)
     if(cpunum() == 0){
       acquire(&tickslock);
       ticks++;
+      update_times(); // update retime, rutime, stime // Ass1 task3.
       wakeup(&ticks);
       release(&tickslock);
     }
@@ -108,4 +109,8 @@ trap(struct trapframe *tf)
   // Check if the process has been killed since we yielded
   if(proc && proc->killed && (tf->cs&3) == DPL_USER)
     exit(0);
+}
+
+int get_ticks(void) {
+  return ticks;
 }
