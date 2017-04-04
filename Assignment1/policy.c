@@ -15,5 +15,5 @@ main(int argc, char *argv[])
 		exit(1);		
 	}
 	policy(pl);
-	printf(1, "policy changed to %d successfully\n", pl);
+	printf(1, "policy changed successfully to %d\n", pl);
 }

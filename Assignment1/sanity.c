@@ -3,6 +3,8 @@
 #include "user.h"
 #include "fs.h"
 
+#define NCHILD 30 // number of children
+
 struct perf {
   int ctime;  // process creation time
   int ttime;  // process termination time
@@ -12,35 +14,35 @@ struct perf {
 } p;
 
 
-void timeConsuming(){
-  int init = uptime();
-  int curr = init;
+void busy_wait(){
+  int curr_tick = uptime();
+  int tick = curr_tick;
   int counter =0;
   while(counter<30){
-    if(uptime()!=curr){
-      curr=uptime();
+    if(uptime()!=tick){
+      tick = uptime();
       counter++;
     }
   }
   exit(0);
 }
 
-void blockOnly(){
+void go_to_sleep(){
   int i;
   for(i=0;i<30;i++)
     sleep(1);
   exit(0);
 }
 
-void mixed(){
+void wait_and_sleep(){
   int i;
-  int init = uptime();
-  int curr = init;
+  int curr_tick = uptime();
+  int tick = curr_tick;
   int counter =0;
   for(i=0;i<5;i++){
     while(counter<30){
-    if(uptime()!=curr){
-      curr=uptime();
+    if(uptime()!=tick){
+      tick = uptime();
       counter++;
     }
   }
@@ -50,80 +52,67 @@ void mixed(){
 }
 
 /* struct printing */
-void printPerf(struct perf p ,int pid){
-  printf(2,"the pid is %d\n",pid );
-  printf(2,"the turnaround time is %d\n",(p.ttime-p.ctime));
-  printf(2,"the ttime is %d\n",p.ttime);
-  printf(2,"the stime is %d\n",p.stime);
-  printf(2,"the retime is %d\n",p.retime);
-  printf(2,"the rutime is %d\n\n",p.rutime);
+void print_performance(struct perf p ,int pid){
+  printf(1,"the pid is %d\n",pid );
+  printf(1,"the turnaround time is %d\n",(p.ttime-p.ctime));
+  printf(1,"the ttime is %d\n",p.ttime);
+  printf(1,"the stime is %d\n",p.stime);
+  printf(1,"the retime is %d\n",p.retime);
+  printf(1,"the rutime is %d\n\n",p.rutime);
 
 }
 
 int
 main(int argc, char *argv[])
 { 
-  printf(1,"Sanity Test ! Calculating results.. please wait..\n\n");
+  printf(1,"=========== Sanity Test Results: ===========\n\n");
   /*creating 10 proccesses of CPU only*/
-  int i,pid;
+  int i;
+  int pid;
   int* status=0;
-  for(i=0;i<10;i++){
+  for(i=0;i<NCHILD/3;i++){
     pid =fork();
     if(pid==0)
-      timeConsuming();
-
+      busy_wait();
   }
+
   /*creating 10 proccesses of Blocking only*/
-  for(i=0;i<10;i++){
+  for(i=0;i<NCHILD/3;i++){
     pid =fork();
     if(pid==0)
-      blockOnly();
-
+      go_to_sleep();
   }
+
   /*creating 10 proccesses of mixed */
-  for(i=0;i<10;i++){
+  for(i=0;i<NCHILD/3;i++){
     pid =fork();
     if(pid==0)
-      mixed();
-
+      wait_and_sleep();
   }
+
   /* printing results and averages*/
   int wait=0,turnaround=0,running=0,sleep=0;;
-  for(i=0;i<30;i++){
-    printPerf(p,wait_stat(status,&p));
+  for(i=0;i<NCHILD;i++){
+    // The parent collect the data from each child.
+    int child_pid = wait_stat(status,&p);
+    print_performance(p,child_pid);
     wait+=p.retime;
     turnaround+=(p.ttime-p.ctime);
     running+=p.rutime;
     sleep+=p.stime;
   }
-  wait=wait/30;
-  turnaround=turnaround/30;
-  running=running/30;
-  sleep=sleep/30;
-  printf(1,"The avrages are: \n" );
-  printf(2,"waiting time: %d\n",wait);
-  printf(2,"turnaround time: %d\n",turnaround);
-  printf(2,"running time: %d\n",running);
-  printf(2,"sleeping time: %d\n",sleep);
+
+  // compute averages
+  wait=wait/NCHILD;
+  turnaround=turnaround/NCHILD;
+  running=running/NCHILD;
+  sleep=sleep/NCHILD;
+
+  printf(1,"=========== The avrages are ===========\n" );
+  printf(1,"waiting time: %d\n",wait);
+  printf(1,"turnaround time: %d\n",turnaround);
+  printf(1,"running time: %d\n",running);
+  printf(1,"sleeping time: %d\n",sleep);
 
   return 1;
 }
-
-/*
-int main() {
-    int status;
-    struct perf performance;
-    if (fork() >0 || fork() >0 ||fork() >0 || fork() >0 ||fork() >0 || fork() >0 
-        || fork() >0 || fork() >0 ||fork() >0 || fork() >0 ||fork() >0 || fork() >0
-        || fork() >0 || fork() >0 ||fork() >0 || fork() >0 ||fork() >0 || fork() >0 ) {
-        wait_stat(&status,&performance);
-         printf(1,"ctime = %d, ttime=%d, stime = %d, retime = %d, rutime = %d\n\n"   
-                  ,performance.ctime, performance.ttime, performance.stime, performance.retime, performance.rutime);
-        exit(0);
-    } 
-    else {
-        exit(137);
-    }
-
-}
-*/
