@@ -588,7 +588,8 @@ procdump(void)
 // change currently running process priority. Ass 1 task3.2.
 void
 priority(int pr){
-  proc->priority = pr;
+  if (npolicy == 1)
+    proc->priority = pr;
 }
 
 // change currently policy. Ass 1 task3.3.
